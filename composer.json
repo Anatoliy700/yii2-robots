@@ -1,0 +1,30 @@
+{
+    "name": "anatoliy700/yii2-robots",
+    "description": "Implements a dynamic robots.txt file",
+    "type": "yii2-extension",
+    "require": {
+        "php": ">=7.2.0",
+        "yiisoft/yii2": "^2.0.0",
+        "yii2-developer/yii2-configure": "~1.2.0"
+    },
+    "require-dev": {
+        "yiisoft/yii2-coding-standards": "~2.0"
+    },
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Anatoliy",
+            "email": "anatoliy.rus@gmail.com"
+        }
+    ],
+    "scripts": {
+        "check": "vendor\\bin\\phpcs -v --extensions=php --standard=vendor/yiisoft/yii2-coding-standards/Yii2 src"
+    },
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {"anatoliy700\\robots\\":  "src/"}
+    },
+    "extra": {
+        "bootstrap": "anatoliy700\\robots\\Module"
+    }
+}
