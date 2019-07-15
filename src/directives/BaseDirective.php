@@ -2,7 +2,7 @@
 
 namespace anatoliy700\robots\directives;
 
-use ReflectionClass;
+use anatoliy700\robots\helpers\RobotsHelper;
 use ReflectionException;
 use yii\base\Model;
 
@@ -11,12 +11,12 @@ abstract class BaseDirective extends Model implements IDirective
     /**
      * @var string
      */
-    protected $name;
+    public $name;
 
     /**
      * @var string
      */
-    protected $prefix;
+    public $prefix;
 
     /**
      * BaseDirective constructor.
@@ -45,13 +45,11 @@ abstract class BaseDirective extends Model implements IDirective
     }
 
     /**
-     * @param null $attributeNames
-     * @param bool $clearErrors
      * @return bool
      */
-    public function validate($attributeNames = null, $clearErrors = true): bool
+    public function validateProps(): bool
     {
-        return parent::validate($attributeNames, $clearErrors);
+        return parent::validate();
     }
 
     /**
@@ -68,10 +66,10 @@ abstract class BaseDirective extends Model implements IDirective
      */
     protected function getValidNames()
     {
-        $constant = (new ReflectionClass(static::class))->getConstants();
-        $excludeConstant = (new ReflectionClass(Model::class))->getConstants();
-
-        return array_values(array_diff($constant, $excludeConstant));
+        return array_values(RobotsHelper::classConstantsToArray(
+            IDirective::class,
+            Model::class
+        ));
     }
 
     /**
@@ -88,5 +86,35 @@ abstract class BaseDirective extends Model implements IDirective
     public function getPrefix(): string
     {
         return $this->prefix;
+    }
+
+    /**
+     * @param string $name
+     * @return IDirective
+     */
+    public function setName(string $name): IDirective
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @param string $prefix
+     * @return IDirective
+     */
+    public function setPrefix(string $prefix): IDirective
+    {
+        $this->prefix = $prefix;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArrayProps(): array
+    {
+        return parent::toArray();
     }
 }

@@ -3,8 +3,10 @@
 namespace anatoliy700\robots;
 
 use anatoliy700\robots\directives\IDirective;
+use anatoliy700\robots\repositories\IRepository;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\di\Instance;
 
 class Robots implements IRobots
 {
@@ -20,6 +22,8 @@ class Robots implements IRobots
 
     /**
      * @var bool
+     *
+     * @todo Валидация реализована только для директив указаных в конфигурационном файле
      */
     public $validateDirective = true;
 
@@ -27,6 +31,22 @@ class Robots implements IRobots
      * @var IDirective[]
      */
     protected $directiveItems;
+
+    /**
+     * @var IRepository
+     */
+    protected $repository;
+
+    /**
+     * Robots constructor.
+     * @throws InvalidConfigException
+     */
+    public function __construct()
+    {
+        if (Yii::$container->has(IRepository::class)) {
+            $this->repository = Instance::ensure(IRepository::class);
+        }
+    }
 
     /**
      * @return string
@@ -48,6 +68,12 @@ class Robots implements IRobots
 
         if ($configDirectives) {
             foreach ($configDirectives as $directive) {
+                $this->addDirective($directive);
+            }
+        }
+
+        if (isset($this->repository) && $directives = $this->repository->fetchAll()) {
+            foreach ($directives as $directive) {
                 $this->addDirective($directive);
             }
         }
@@ -99,7 +125,7 @@ class Robots implements IRobots
      */
     protected function addDirective(IDirective $directive)
     {
-        if (!$this->validateDirective || $directive->validate()) {
+        if (!$this->validateDirective || $directive->validateProps()) {
             $this->directiveItems[] = $directive;
         }
 

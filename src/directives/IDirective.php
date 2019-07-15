@@ -17,9 +17,34 @@ interface IDirective
     public function toString(): string;
 
     /**
-     * @param null $attributeNames
-     * @param bool $clearErrors
      * @return bool
      */
-    public function validate($attributeNames = null, $clearErrors = true): bool;
+    public function validateProps(): bool;
+
+    /**
+     * @return string
+     */
+    public function getName(): string;
+
+    /**
+     * @return string
+     */
+    public function getPrefix(): string;
+
+    /**
+     * @param string $name
+     * @return IDirective
+     */
+    public function setName(string $name): IDirective;
+
+    /**
+     * @param string $prefix
+     * @return IDirective
+     */
+    public function setPrefix(string $prefix): IDirective;
+
+    /**
+     * @return array
+     */
+    public function toArrayProps(): array;
 }

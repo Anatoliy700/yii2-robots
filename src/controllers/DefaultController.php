@@ -13,5 +13,4 @@ class DefaultController extends Controller
             'index' => RobotsActions::class,
         ];
     }
-
 }
