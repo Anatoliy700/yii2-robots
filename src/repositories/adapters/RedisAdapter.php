@@ -1,6 +1,6 @@
 <?php
 
-namespace anatoliy700\robots\repositories\activeRecordAdapters;
+namespace anatoliy700\robots\repositories\adapters;
 
 use anatoliy700\robots\directives\IDirective;
 use yii\redis\ActiveRecord;
@@ -11,10 +11,11 @@ use yii\redis\ActiveRecord;
  * @property $id
  * @property $name
  * @property $prefix
+ * @property $key
  *
  * @package anatoliy700\robots\repositories\activeRecordAdapters
  */
-class Redis extends ActiveRecord implements IDirective
+class RedisAdapter extends ActiveRecord implements IDirective
 {
     /**
      * @return array
@@ -22,8 +23,8 @@ class Redis extends ActiveRecord implements IDirective
     public function rules()
     {
         return [
-            [['name', 'prefix'], 'required'],
-            [['name', 'prefix'], 'string'],
+            [['name', 'prefix', 'key'], 'required'],
+            [['name', 'prefix', 'key'], 'string'],
         ];
     }
 
@@ -32,7 +33,7 @@ class Redis extends ActiveRecord implements IDirective
      */
     public function attributes()
     {
-        return ['id', 'name', 'prefix'];
+        return ['id', 'name', 'prefix', 'key'];
     }
 
     /**
@@ -82,18 +83,43 @@ class Redis extends ActiveRecord implements IDirective
     }
 
     /**
-     * @return bool
+     * @return string
      */
-    public function validateProps(): bool
+    public function getKey(): string
     {
-        return parent::validate();
+        return $this->key;
     }
 
     /**
+     * @param $key
+     * @return IDirective
+     */
+    public function setKey($key): IDirective
+    {
+        $this->setAttribute('key', $key);
+
+        return $this;
+    }
+
+
+    /**
+     * @param null $attributeNames
+     * @param bool $clearErrors
+     * @return bool
+     */
+    public function validate($attributeNames = null, $clearErrors = true): bool
+    {
+        return parent::validate($attributeNames, $clearErrors);
+    }
+
+    /**
+     * @param array $fields
+     * @param array $expand
+     * @param bool $recursive
      * @return array
      */
-    public function toArrayProps(): array
+    public function toArray(array $fields = [], array $expand = [], $recursive = true): array
     {
-        return parent::toArray();
+        return parent::toArray($fields, $expand, $recursive);
     }
 }

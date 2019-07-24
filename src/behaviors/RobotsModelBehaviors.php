@@ -3,6 +3,7 @@
 namespace anatoliy700\robots\behaviors;
 
 use anatoliy700\robots\directives\IDirective;
+use anatoliy700\robots\generators\IRouteGenerator;
 use anatoliy700\robots\repositories\IRepository;
 use Yii;
 use yii\base\Behavior;
@@ -12,7 +13,7 @@ use yii\db\ActiveRecord;
 class RobotsModelBehaviors extends Behavior
 {
     /**
-     * @var string
+     * @var array
      */
     public $route;
 
@@ -27,13 +28,20 @@ class RobotsModelBehaviors extends Behavior
     protected $repository;
 
     /**
+     * @var IRouteGenerator
+     */
+    protected $routeGenerator;
+
+    /**
      * RobotsModelBehaviors constructor.
      * @param IRepository $repository
+     * @param IRouteGenerator $routeGenerator
      * @param array $config
      */
-    public function __construct(IRepository $repository, $config = [])
+    public function __construct(IRepository $repository, IRouteGenerator $routeGenerator, $config = [])
     {
         $this->repository = $repository;
+        $this->routeGenerator = $routeGenerator;
         parent::__construct($config);
     }
 
@@ -58,7 +66,7 @@ class RobotsModelBehaviors extends Behavior
         switch ($event->name) {
             case 'afterInsert':
             case 'afterUpdate':
-                if (array_key_exists($this->robotsBlockingFlag, $this->getFlagsToNameDirectiveArray())) {
+                if (array_key_exists($this->robotsBlockingFlag, $this->repository->getFlagsToNameDirectiveArray())) {
                     $this->addDirective();
                     break;
                 }
@@ -76,26 +84,25 @@ class RobotsModelBehaviors extends Behavior
             $this->repository->getNameDirectiveByFlag($this->robotsBlockingFlag),
             $this->getPrefix()
         );
-        if ($directive->validateProps()) {
-            $this->repository->saveDirective($directive);
+        if ($directive->validate()) {
+            $this->repository->saveDirective($this->getKey(), $directive);
         }
     }
 
     /**
-     * @throws InvalidConfigException
+     *
      */
     protected function deleteDirective()
     {
-        $this->repository->deleteDirective($this->getPrefix());
+        $this->repository->deleteDirective($this->getKey());
     }
 
     /**
      * @return IDirective|null
-     * @throws InvalidConfigException
      */
     protected function fetchDirective(): ?IDirective
     {
-        return $this->repository->getDirectiveByPrefix($this->getPrefix());
+        return $this->repository->getDirectiveByKey($this->getKey());
     }
 
     /**
@@ -111,7 +118,6 @@ class RobotsModelBehaviors extends Behavior
 
     /**
      * @return int
-     * @throws InvalidConfigException
      */
     public function getRobotsBlockingFlag(): int
     {
@@ -132,35 +138,57 @@ class RobotsModelBehaviors extends Behavior
 
     /**
      * @return string
+     */
+    public function getRobotsPath(): ?string
+    {
+        $directive = $this->fetchDirective();
+
+        return $directive ? $directive->getPrefix() : null;
+    }
+
+    /**
+     * @return string
      * @throws InvalidConfigException
      */
     protected function getPrefix(): string
     {
-        if (is_null($this->route)) {
+        return $this->routeGenerator->getPath($this->getRoute());
+    }
+
+    /**
+     * @return array
+     * @throws InvalidConfigException
+     */
+    protected function getRoute(): array
+    {
+        if (!is_array($this->route) || !count($this->route)) {
             throw new InvalidConfigException('Route not set');
         }
+        $route = [];
 
-        $pattern = '/[\w|\/]+(?<replace_alias><(?<alias>\w+)>)[\w|\/]*/';
-        $match = [];
-        preg_match($pattern, $this->route, $match);
-        if (isset($match['replace_alias']) && isset($match['alias'])) {
-            $alias = $match['alias'];
-            $replacement = [
-                $match['replace_alias'] => $this->owner->$alias,
-            ];
-            $route = strtr($this->route, $replacement);
-        } else {
-            $route = $this->route;
+        $route[] = $this->route[0];
+        unset($this->route[0]);
+
+        foreach ($this->route as $key => $attrName) {
+            $route[$key] = $this->owner->$attrName;
         }
 
         return $route;
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getFlagsToNameDirectiveArray(): array
+    protected function getKey(): string
     {
-        return $this->repository->getFlagsToNameDirectiveArray();
+        $key = [
+            get_class($this->owner),
+            Yii::$app->controller->module->id,
+            Yii::$app->controller->id,
+            Yii::$app->language,
+            $this->owner->id,
+        ];
+
+        return implode('', $key);
     }
 }

@@ -19,7 +19,7 @@ interface IDirective
     /**
      * @return bool
      */
-    public function validateProps(): bool;
+    public function validate(): bool;
 
     /**
      * @return string
@@ -46,5 +46,5 @@ interface IDirective
     /**
      * @return array
      */
-    public function toArrayProps(): array;
+    public function toArray(): array;
 }
