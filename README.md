@@ -120,7 +120,12 @@ composer require anatoliy700/yii2-robots
         'definitions' => [
             'anatoliy700\robots\generators\IRouteGenerator' => [
                 'class' => 'anatoliy700\robots\generators\RouteGenerator',
-                'urlManager' => require(__DIR__ . '/frontend/urlManager.php'),
+                'urlManager' => [
+                    'class' => 'yii\web\UrlManager',
+                    'enablePrettyUrl' => true,
+                    'showScriptName' => false,
+                    'rules' => [...],
+                ],
             ],
         ],
     ]
