@@ -2,7 +2,7 @@
 
 namespace anatoliy700\robots\directives;
 
-use anatoliy700\robots\helpers\RobotsHelper;
+use ReflectionClass;
 use ReflectionException;
 use yii\base\Model;
 
@@ -45,9 +45,11 @@ abstract class BaseDirective extends Model implements IDirective
     }
 
     /**
+     * @param null $attributeNames
+     * @param bool $clearErrors
      * @return bool
      */
-    public function validateProps(): bool
+    public function validate($attributeNames = null, $clearErrors = true): bool
     {
         return parent::validate();
     }
@@ -66,10 +68,11 @@ abstract class BaseDirective extends Model implements IDirective
      */
     protected function getValidNames()
     {
-        return array_values(RobotsHelper::classConstantsToArray(
-            IDirective::class,
-            Model::class
-        ));
+        $constant = (new ReflectionClass(IDirective::class))->getConstants();
+        $excludeConstant = (new ReflectionClass(Model::class))->getConstants();
+        $constant = array_diff($constant, $excludeConstant);
+
+        return array_values($constant);
     }
 
     /**
@@ -111,9 +114,12 @@ abstract class BaseDirective extends Model implements IDirective
     }
 
     /**
+     * @param array $fields
+     * @param array $expand
+     * @param bool $recursive
      * @return array
      */
-    public function toArrayProps(): array
+    public function toArray(array $fields = [], array $expand = [], $recursive = true): array
     {
         return parent::toArray();
     }

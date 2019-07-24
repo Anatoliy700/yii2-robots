@@ -2,7 +2,6 @@
     "name": "anatoliy700/yii2-robots",
     "description": "Implements a dynamic robots.txt file",
     "type": "yii2-extension",
-    "version": "1.0.0",
     "require": {
         "php": ">=7.2.0",
         "yiisoft/yii2": "^2.0.0",

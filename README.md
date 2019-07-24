@@ -71,12 +71,12 @@ composer require anatoliy700/yii2-robots
 
   'RobotsBehavior' => [
       'class' => 'anatoliy700\robots\behaviors\RobotsModelBehaviors',
-      'route' => '/content/<alias>'
+      'route' => ['content/default/index', 'alias' => 'alias']
   ]
 ```
 
-В свойстве `route` необходимо обязательно указать `path` до текущей страницы,
-динамическая часть указывается в `<>`,внутри которых указвается имя свойства данной модели из которого надо подставить данные.
+В свойстве `route` необходимо обязательно маршрут и параметры,
+в значение в массиве параметров указывается имя свойства данной модели из которого надо подставить данные.
 
 В правила модели добавить:
 ```php
@@ -88,13 +88,13 @@ composer require anatoliy700/yii2-robots
 <?= $form->field($model, 'robotsBlockingFlag')->checkbox() ?>
 ```    
 
-И описать зависимость репозитория, который реализует хранилище для динамических директив :
+Описать зависимость репозитория, который реализует хранилище для динамических директив :
 ```php
   'container' => [
       'definitions' => [
            'anatoliy700\robots\repositories\IRepository' => [
                'class' => 'anatoliy700\robots\repositories\ActiveRecordRepository',
-               'activeRecord' => 'anatoliy700\robots\repositories\activeRecordAdapters\Redis',
+               'activeRecord' => 'anatoliy700\robots\repositories\adapters\RedisAdapter',
            ],
       ],
   ]
@@ -113,3 +113,16 @@ composer require anatoliy700/yii2-robots
       ],
   ]
 ```
+
+Для генерации `URI` из роута, необходима описать зависимость `IRouteGenerator`:
+```php
+    'container' => [
+        'definitions' => [
+            'anatoliy700\robots\generators\IRouteGenerator' => [
+                'class' => 'anatoliy700\robots\generators\RouteGenerator',
+                'urlManager' => require(__DIR__ . '/frontend/urlManager.php'),
+            ],
+        ],
+    ]
+```
+В свойство `urlManager` необходимо передать конфигурацию urlManager с действующими правилами маршрутизации.

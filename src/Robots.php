@@ -6,7 +6,6 @@ use anatoliy700\robots\directives\IDirective;
 use anatoliy700\robots\repositories\IRepository;
 use Yii;
 use yii\base\InvalidConfigException;
-use yii\di\Instance;
 
 class Robots implements IRobots
 {
@@ -39,13 +38,11 @@ class Robots implements IRobots
 
     /**
      * Robots constructor.
-     * @throws InvalidConfigException
+     * @param IRepository $repository
      */
-    public function __construct()
+    public function __construct(IRepository $repository)
     {
-        if (Yii::$container->has(IRepository::class)) {
-            $this->repository = Instance::ensure(IRepository::class);
-        }
+        $this->repository = $repository;
     }
 
     /**
@@ -125,7 +122,7 @@ class Robots implements IRobots
      */
     protected function addDirective(IDirective $directive)
     {
-        if (!$this->validateDirective || $directive->validateProps()) {
+        if (!$this->validateDirective || $directive->validate()) {
             $this->directiveItems[] = $directive;
         }
 
@@ -148,12 +145,12 @@ class Robots implements IRobots
      */
     protected function getContent(): string
     {
-        $content = '';
+        $content = [];
 
         foreach ($this->directiveItems as $directive) {
-            $content .= $directive->toString() . PHP_EOL;
+            $content[] = $directive->toString();
         }
 
-        return $content;
+        return implode(PHP_EOL, $content);
     }
 }

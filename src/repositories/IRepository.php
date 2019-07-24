@@ -11,22 +11,23 @@ interface IRepository
     const ALLOW_FLAG = 2;
 
     /**
+     * @param string $key
      * @param IDirective $directive
      * @return mixed
      */
-    public function saveDirective(IDirective $directive);
+    public function saveDirective(string $key, IDirective $directive);
 
     /**
-     * @param string $prefix
+     * @param string $key
      * @return mixed
      */
-    public function deleteDirective(string $prefix);
+    public function deleteDirective(string $key);
 
     /**
-     * @param $prefix
+     * @param $key
      * @return IDirective|null
      */
-    public function getDirectiveByPrefix($prefix): ?IDirective;
+    public function getDirectiveByKey($key): ?IDirective;
 
     /**
      * @param $flag
